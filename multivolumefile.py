@@ -17,6 +17,7 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #
+import contextlib
 import io
 import os
 from typing import List, Union
@@ -26,7 +27,7 @@ def open(names, *, mode=None, volume=None) -> io.RawIOBase:
     return MultiVolume(names, mode=mode, volume=volume)
 
 
-class MultiVolume(io.RawIOBase):
+class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
 
     def __init__(self, names, *, mode=None, volume=None):
         self._mode = mode
@@ -152,3 +153,9 @@ class MultiVolume(io.RawIOBase):
 
     def __del__(self):
         pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()

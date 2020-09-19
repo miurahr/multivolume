@@ -28,3 +28,14 @@ def test_read_seek():
     mv = MV.open(target, mode='rb')
     mv.seek(40000)
     mv.close()
+
+
+def test_read_context():
+    target = [os.path.join(testdata_path, "archive.7z.001"),
+              os.path.join(testdata_path, "archive.7z.002")]
+    with MV.open(target, mode='rb') as mv:
+        mv.seek(24900)
+        data = mv.read(200)
+        assert len(data) == 100
+        data = mv.read(200)
+        assert len(data) == 200

@@ -8,7 +8,6 @@ local_scheme = "no-local-version"
 [tool.coverage.run]
 branch = true
 parallel = true
-source = ["multivolumefile.py"]
 
 [tool.coverage.report]
 show_missing = true
