@@ -65,7 +65,7 @@ class MultiVolume(io.RawIOBase):
                     self._files[i].seek(offset, io.SEEK_SET)
                 return i
         if self._mode == 'rb' or self._mode == 'r':
-            return len(self._positions) - 1
+            return len(self._files) - 1
         else:
             raise NotImplementedError
 
