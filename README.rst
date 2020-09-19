@@ -8,12 +8,12 @@ as virtually like as a single file.
 Install
 =======
 
-Currently it is not on PyPI because of early alpha status, you should install
-from github repository as such
+Currently it is not on PyPI because of pre alpha status, you should install
+from test pypi.
 
 ```
-pip install -e https://github.com/miurahr/multivolume
-```
+pip install -i https://test.pypi.org/simple/ multivolume
+``
 
 Contribution
 ============
