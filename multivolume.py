@@ -16,10 +16,10 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
+#
 import io
 import os
-from typing import Union, List
+from typing import List, Union
 
 
 def open(names, *, mode=None, volume=None) -> io.RawIOBase:
@@ -54,7 +54,7 @@ class MultiVolume(io.RawIOBase):
             self._files.append(io.open(name, mode=self.mode))
 
     def _init_writer(self, names, mode, volume):
-        raise NotImplemented
+        raise NotImplementedError
 
     def _current_index(self):
         for i in range(len(self._positions) - 1):
@@ -66,7 +66,7 @@ class MultiVolume(io.RawIOBase):
                 return i
         raise IndexError
 
-    def read(self, size=1) -> bytes:
+    def read(self, size: int = 1) -> bytes:
         current = self._current_index()
         file = self._files[current]
         data = file.read(size)
@@ -79,13 +79,13 @@ class MultiVolume(io.RawIOBase):
         return data
 
     def readall(self) -> bytes:
-        raise NotImplemented
+        raise NotImplementedError
 
     def readinto(self, b: Union[bytes, bytearray, memoryview]):
         pass
 
     def write(self, b: Union[bytes, bytearray, memoryview]):
-        raise NotImplemented
+        raise NotImplementedError
 
     def close(self) -> None:
         self._closed = True
@@ -104,7 +104,7 @@ class MultiVolume(io.RawIOBase):
         return -1
 
     def flush(self) -> None:
-        raise NotImplemented
+        raise NotImplementedError
 
     def isatty(self) -> bool:
         return False
@@ -112,11 +112,11 @@ class MultiVolume(io.RawIOBase):
     def readable(self) -> bool:
         return True
 
-    def readline(self, size:int = -1) -> bytes:
-        raise NotImplemented
+    def readline(self, size: int = -1) -> bytes:
+        raise NotImplementedError
 
-    def readlines(self, hint:int = -1) -> List[bytes]:
-        raise NotImplemented
+    def readlines(self, hint: int = -1) -> List[bytes]:
+        raise NotImplementedError
 
     def seek(self, offset, whence=io.SEEK_SET):
         if whence == io.SEEK_SET:
@@ -139,13 +139,13 @@ class MultiVolume(io.RawIOBase):
         return self._position
 
     def truncate(self, size=None):
-        raise NotImplemented
+        raise NotImplementedError
 
     def writable(self) -> bool:
         return False
 
     def writelines(self, lines):
-        raise NotImplemented
+        raise NotImplementedError
 
     def __del__(self):
         pass

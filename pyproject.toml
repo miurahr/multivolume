@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.5.0"]
+build-backend = "setuptools.build_meta"
+
+[tools.setuptools_scm]
+local_scheme = "no-local-version"
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source = ["multivolume.py"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = ["if __name__ == .__main__.:", "pragma: no-cover", "@abstract", "def __repr__"]
