@@ -1,19 +1,17 @@
-===========
-multivolume
-===========
+===============
+multivolumefile
+===============
 
-MultiVolume is a python library to provide a file-object wrapping multiple files
+MultiVolumefile is a python library to provide a file-object wrapping multiple files
 as virtually like as a single file.
 
 Install
 =======
 
-Currently it is not on PyPI because of pre alpha status, you should install
-from test pypi.
 
 ```
-pip install -i https://test.pypi.org/simple/ multivolume
-``
+pip install multivolumefile
+```
 
 Contribution
 ============
