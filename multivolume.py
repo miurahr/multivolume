@@ -29,13 +29,13 @@ def open(names, *, mode=None, volume=None) -> io.RawIOBase:
 class MultiVolume(io.RawIOBase):
 
     def __init__(self, names, *, mode=None, volume=None):
-        self.mode = mode
+        self._mode = mode
         self._closed = False
         self._files = []
         self._fileinfo = []
         self._position = 0
         self._positions = []
-        if mode == 'rb':
+        if mode == 'rb' or mode == 'r':
             self._init_reader(names)
             pos = 0
             self._positions.append(pos)
@@ -45,13 +45,13 @@ class MultiVolume(io.RawIOBase):
         elif mode == 'w':
             self._init_writer(names, mode, volume)
         else:
-            raise Exception('Unknown mode')
+            raise NotImplementedError
 
     def _init_reader(self, names):
         for name in names:
             size = os.stat(name).st_size
             self._fileinfo.append(size)
-            self._files.append(io.open(name, mode=self.mode))
+            self._files.append(io.open(name, mode=self._mode))
 
     def _init_writer(self, names, mode, volume):
         raise NotImplementedError
@@ -64,7 +64,10 @@ class MultiVolume(io.RawIOBase):
                 if pos != offset:
                     self._files[i].seek(offset, io.SEEK_SET)
                 return i
-        raise IndexError
+        if self._mode == 'rb' or self._mode == 'r':
+            return len(self._positions) - 1
+        else:
+            raise NotImplementedError
 
     def read(self, size: int = 1) -> bytes:
         current = self._current_index()
