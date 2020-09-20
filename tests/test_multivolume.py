@@ -10,8 +10,7 @@ os.umask(0o022)
 
 
 def test_read_check_sha1():
-    target = [os.path.join(testdata_path, "archive.7z.001"),
-              os.path.join(testdata_path, "archive.7z.002")]
+    target = os.path.join(testdata_path, "archive.7z")
     mv = MV.open(target, mode='rb')
     sha = hashlib.sha256()
     data = mv.read(BLOCKSIZE)
@@ -23,19 +22,38 @@ def test_read_check_sha1():
 
 
 def test_read_seek():
-    target = [os.path.join(testdata_path, "archive.7z.001"),
-              os.path.join(testdata_path, "archive.7z.002")]
+    target = os.path.join(testdata_path, "archive.7z")
     mv = MV.open(target, mode='rb')
     mv.seek(40000)
     mv.close()
 
 
 def test_read_context():
-    target = [os.path.join(testdata_path, "archive.7z.001"),
-              os.path.join(testdata_path, "archive.7z.002")]
+    target = os.path.join(testdata_path, "archive.7z")
     with MV.open(target, mode='rb') as mv:
         mv.seek(24900)
         data = mv.read(200)
         assert len(data) == 100
         data = mv.read(200)
         assert len(data) == 200
+
+
+def test_write(tmp_path):
+    target = tmp_path.joinpath('target.7z')
+    with MV.open(target, mode='wb', volume=10240) as volume:
+        with open(os.path.join(testdata_path, "archive.7z.001"), 'rb') as r:
+            data = r.read(BLOCKSIZE)
+            while len(data) > 0:
+                volume.write(data)
+                data = r.read(BLOCKSIZE)
+
+        with open(os.path.join(testdata_path, "archive.7z.002"), 'rb') as r:
+            data = r.read(BLOCKSIZE)
+            while len(data) > 0:
+                volume.write(data)
+                data = r.read(BLOCKSIZE)
+        volume.seek(0)
+        volume.seek(51000)
+    created = tmp_path.joinpath('target.7z.0001')
+    assert created.exists()
+    assert created.stat().st_size == 10240
