@@ -38,6 +38,24 @@ def test_read_context():
         assert len(data) == 200
 
 
+def test_readinto():
+    target = os.path.join(testdata_path, "archive.7z")
+    b = bytearray(200)
+    with MV.open(target, mode='rb') as mv:
+        mv.seek(24900)
+        size = mv.readinto(b)
+        assert size == 100
+
+
+def test_read_boundary():
+    target = os.path.join(testdata_path, "archive.7z")
+    b = bytearray(200)
+    with MV.open(target, mode='rb') as mv:
+        mv.seek(25000)
+        size = mv.readinto(b)
+        assert size == 200
+
+
 def test_write(tmp_path):
     target = tmp_path.joinpath('target.7z')
     with MV.open(target, mode='wb', volume=10240) as volume:
