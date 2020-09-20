@@ -92,23 +92,22 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
                 else:
                     mode = 'r'
                 pos = 0
+                size = 0
                 self._positions = [0]
-                for i in range(len(filenames) - 2):
+                for i in range(len(filenames)):
                     file = io.open(filenames[i], mode)
                     self._files.append(file)
                     size = filenames[i].stat().st_size
                     self._fileinfo.append(_FileInfo(filenames[i], size))
                     pos += size
                     self._positions.append(pos)
+                    self._position = pos
                 # last file
-                file = io.open(filenames[-1], mode=self._mode)
-                self._files.append(file)
-                size = filenames[-1].stat().st_size
-                self._fileinfo.append(_FileInfo(filenames[i], size))
-                pos += size
-                self._positions.append(pos)
-                file.seek(0, os.SEEK_END)
-                self._position = pos
+                if size >= self._volume_size:
+                    self._add_volume()
+                else:
+                    self._files[-1].close()
+                    self._files[-1] = io.open(filenames[len(filenames) - 1], mode=self._mode)
             else:
                 raise NotImplementedError
         else:

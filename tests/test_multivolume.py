@@ -90,6 +90,36 @@ def test_write(tmp_path):
     assert created.stat().st_size == 10240
 
 
+def test_write_boundary(tmp_path):
+    target = tmp_path.joinpath('target.7z')
+    with MV.open(target, mode='wb', volume=10240) as volume:
+        assert volume.writable()
+        with open(os.path.join(testdata_path, "archive.7z.001"), 'rb') as r:
+            data = r.read(10000)
+            volume.write(data)
+            data = r.read(250)
+            volume.write(data)
+        volume.flush()
+    created = tmp_path.joinpath('target.7z.0002')
+    assert created.exists()
+    assert created.stat().st_size == 10
+
+
+def test_write_exist(tmp_path):
+    target = tmp_path.joinpath('target.7z')
+    target_volume = tmp_path.joinpath('target.7z.0001')
+    shutil.copyfile(os.path.join(testdata_path, "archive.7z.001"), target_volume)
+    #
+    with MV.open(target, mode='wb', volume=10240) as volume:
+        assert volume.writable()
+        with open(os.path.join(testdata_path, "archive.7z.001"), 'rb') as r:
+            data = r.read(10000)
+            volume.write(data)
+        volume.flush()
+    created = tmp_path.joinpath('target.7z.0001')
+    assert created.stat().st_size == 10000
+
+
 def test_exclusive_write(tmp_path):
     target = tmp_path.joinpath('target.7z')
     with MV.open(target, mode='xb', volume=10240) as volume:
@@ -120,3 +150,27 @@ def test_exclusive_write_exist(tmp_path):
     shutil.copyfile(os.path.join(testdata_path, "archive.7z.001"), target_volume)
     with pytest.raises(FileExistsError):
         MV.open(target, 'x')
+
+
+def test_write_append(tmp_path):
+    target = tmp_path.joinpath('target.7z')
+    target_volume = tmp_path.joinpath('target.7z.0001')
+    shutil.copyfile(os.path.join(testdata_path, "archive.7z.001"), target_volume)
+    #
+    with MV.open(target, mode='ab', volume=10240) as volume:
+        with open(os.path.join(testdata_path, "archive.7z.002"), 'rb') as r:
+            data = r.read(BLOCKSIZE)
+            while len(data) > 0:
+                volume.write(data)
+                data = r.read(BLOCKSIZE)
+        volume.flush()
+    #
+    existed = tmp_path.joinpath('target.7z.0001')
+    assert existed.exists()
+    assert existed.stat().st_size == 25000
+    created2 = tmp_path.joinpath('target.7z.0002')
+    assert created2.exists()
+    assert created2.stat().st_size == 10240
+    created4 = tmp_path.joinpath('target.7z.0004')
+    assert created4.exists()
+    assert created4.stat().st_size == 6857  # 52337 - 25000 - 10240 * 2

@@ -25,6 +25,15 @@ Removed
 Security
 --------
 
+`v0.1.2`_
+=========
+
+Fixed
+-----
+
+* Fix append mode (#1)
+
+
 `v0.1.1`_
 =========
 
@@ -58,7 +67,8 @@ Changed
 * Support read functions.
 
 .. History links
-.. _Unreleased: https://github.com/miurahr/py7zr/compare/v0.1.1...HEAD
+.. _Unreleased: https://github.com/miurahr/py7zr/compare/v0.1.2...HEAD
+.. _v0.1.2: https://github.com/miurahr/py7zr/compare/v0.1.1...v0.1.2
 .. _v0.1.1: https://github.com/miurahr/py7zr/compare/v0.1.0...v0.1.1
 .. _v0.1.0: https://github.com/miurahr/py7zr/compare/v0.0.5...v0.1.0
 .. _v0.0.5: https://github.com/miurahr/py7zr/compare/v0.0.1...v0.0.5
