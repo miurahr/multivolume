@@ -25,6 +25,24 @@ Removed
 Security
 --------
 
+`v0.1.0`_
+=========
+
+* ***API changed***
+
+Added
+-----
+
+* Add mode 'x', 'xb' and 'xt'
+* Add mode 'a', 'ab' and 'at'
+* Support flush()
+
+Changed
+-------
+
+* Change API: file argument of 'r' and 'rb' now single basename instead of list of files
+
+
 `v0.0.5`_
 =========
 
@@ -51,7 +69,8 @@ v0.0.1
 * Support preliminary read functions.
 
 .. History links
-.. _Unreleased: https://github.com/miurahr/py7zr/compare/v0.0.5...HEAD
+.. _Unreleased: https://github.com/miurahr/py7zr/compare/v0.1.0...HEAD
+.. _v0.1.0: https://github.com/miurahr/py7zr/compare/v0.0.5...v0.1.0
 .. _v0.0.5: https://github.com/miurahr/py7zr/compare/v0.0.4...v0.0.5
 .. _v0.0.4: https://github.com/miurahr/py7zr/compare/v0.0.3...v0.0.4
 .. _v0.0.3: https://github.com/miurahr/py7zr/compare/v0.0.2...v0.0.3
