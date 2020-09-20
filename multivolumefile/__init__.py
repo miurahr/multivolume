@@ -125,10 +125,7 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
                 if pos != offset:
                     self._files[i].seek(offset, io.SEEK_SET)
                 return i
-        if self._mode == 'rb' or self._mode == 'r':
-            return len(self._files) - 1
-        else:
-            raise NotImplementedError
+        return len(self._files) - 1
 
     def read(self, size: int = 1) -> bytes:
         current = self._current_index()

@@ -25,6 +25,14 @@ Removed
 Security
 --------
 
+`v0.1.1`_
+=========
+
+Fixed
+-----
+
+* Fin NotImplementedError when writing boudning of target files
+
 `v0.1.0`_
 =========
 
@@ -46,32 +54,11 @@ Changed
 `v0.0.5`_
 =========
 
-* Fix packaging.
-
-`v0.0.4`_
-=========
-
 * Support context manager
-
-`v0.0.3`_
-=========
-
-* Fix read() behavior after all data has read.
-
-`v0.0.2`_
-=========
-
-* Add test
-
-v0.0.1
-======
-
-* Support preliminary read functions.
+* Support read functions.
 
 .. History links
-.. _Unreleased: https://github.com/miurahr/py7zr/compare/v0.1.0...HEAD
+.. _Unreleased: https://github.com/miurahr/py7zr/compare/v0.1.1...HEAD
+.. _v0.1.1: https://github.com/miurahr/py7zr/compare/v0.1.0...v0.1.1
 .. _v0.1.0: https://github.com/miurahr/py7zr/compare/v0.0.5...v0.1.0
-.. _v0.0.5: https://github.com/miurahr/py7zr/compare/v0.0.4...v0.0.5
-.. _v0.0.4: https://github.com/miurahr/py7zr/compare/v0.0.3...v0.0.4
-.. _v0.0.3: https://github.com/miurahr/py7zr/compare/v0.0.2...v0.0.3
-.. _v0.0.2: https://github.com/miurahr/py7zr/compare/v0.0.1...v0.0.2
+.. _v0.0.5: https://github.com/miurahr/py7zr/compare/v0.0.1...v0.0.5
