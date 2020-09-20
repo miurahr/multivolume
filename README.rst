@@ -41,7 +41,7 @@ Usages
 .. code-block::
 
     data = b'abcdefg'
-    with multivolumefile.open('archive.7z', 'rb) as vol:
+    with multivolumefile.open('archive.7z', 'wb') as vol:
         size = vol.write(data)
         vol.seek(0)
 
