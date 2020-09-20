@@ -152,7 +152,33 @@ def test_exclusive_write_exist(tmp_path):
         MV.open(target, 'x')
 
 
-def test_write_append(tmp_path):
+def test_write_append1(tmp_path):
+    target_volume = tmp_path.joinpath('target.7z.0001')
+    with target_volume.open(mode='wb') as target:
+        with open(os.path.join(testdata_path, "archive.7z.001"), 'rb') as src:
+            target.write(src.read(1000))
+    #
+    target = tmp_path.joinpath('target.7z')
+    with MV.open(target, mode='ab', volume=10240) as volume:
+        with open(os.path.join(testdata_path, "archive.7z.002"), 'rb') as r:
+            data = r.read(BLOCKSIZE)
+            while len(data) > 0:
+                volume.write(data)
+                data = r.read(BLOCKSIZE)
+        volume.flush()
+    #
+    existed = tmp_path.joinpath('target.7z.0001')
+    assert existed.exists()
+    assert existed.stat().st_size == 10240
+    created2 = tmp_path.joinpath('target.7z.0002')
+    assert created2.exists()
+    assert created2.stat().st_size == 10240
+    created3 = tmp_path.joinpath('target.7z.0003')
+    assert created3.exists()
+    assert created3.stat().st_size == 7857  # 27337 + 1000 - 10240 * 2
+
+
+def test_write_append2(tmp_path):
     target = tmp_path.joinpath('target.7z')
     target_volume = tmp_path.joinpath('target.7z.0001')
     shutil.copyfile(os.path.join(testdata_path, "archive.7z.001"), target_volume)
