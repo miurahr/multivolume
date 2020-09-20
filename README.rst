@@ -14,10 +14,39 @@ as virtually like as a single file.
 Install
 =======
 
+You can install it as usual public libraries, you can use pip command
 
 ```
 pip install multivolumefile
 ```
+
+You are also able to add it to your setup.py/cfg as dependency.
+
+Usages
+------
+
+- For reading multi-volume files, that has names `archive.7z.0001`, `archive.7z.0002` and so on,
+  you can call multivolumefile as follows;
+
+.. code-block::
+
+    with multivolumefile.open('archive.7z', 'rb) as vol:
+        data = vol.read(100)
+        vol.seek(500)
+
+- For writing multi-volue files, that has names `archive.7z.0001`, `archive.7z.0002` and so on,
+  you can call multivolumefile as follows;
+
+
+.. code-block::
+
+    data = b'abcdefg'
+    with multivolumefile.open('archive.7z', 'rb) as vol:
+        size = vol.write(data)
+        vol.seek(0)
+
+you will see file `archive.7z.001` are written.
+
 
 Contribution
 ============
