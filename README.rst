@@ -2,6 +2,12 @@
 multivolumefile
 ===============
 
+.. image:: https://coveralls.io/repos/github/miurahr/multivolume/badge.svg?branch=master
+:target: https://coveralls.io/github/miurahr/multivolume?branch=master
+
+.. image:: https://github.com/miurahr/multivolume/workflows/Run%20Tox%20tests/badge.svg
+  :target: https://github.com/miurahr/multivolume/actions
+
 MultiVolumefile is a python library to provide a file-object wrapping multiple files
 as virtually like as a single file.
 
