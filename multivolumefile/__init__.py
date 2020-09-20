@@ -44,10 +44,9 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         self._fileinfo = []  # type: List[_FileInfo]
         self._position = 0
         self._positions = []
-        if mode == 'rb' or mode == 'r':
-            filenames = self._glob_files(basename)
-            self._init_reader(filenames)
-        elif mode == 'wb' or mode == 'w':
+        if mode in ['rb', 'r', 'rt']:
+            self._init_reader(basename)
+        elif mode in ['wb',  'w', 'wt', 'xb', 'x', 'xt', 'ab', 'a', 'at']:
             if volume is None:
                 self._volume_size = 10 * 1024 * 1024  # set default to 10MBytes
             else:
@@ -62,10 +61,11 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         files = basename.parent.glob(basename.name + '.*')
         return sorted(files)
 
-    def _init_reader(self, names):
+    def _init_reader(self, basename):
         pos = 0
         self._positions.append(pos)
-        for name in names:
+        filenames = self._glob_files(basename)
+        for name in filenames:
             size = os.stat(name).st_size
             self._fileinfo.append(_FileInfo(name, size))
             self._files.append(io.open(name, mode=self._mode))
@@ -76,9 +76,46 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         if isinstance(basename, str):
             basename = pathlib.Path(basename)
         target = basename.with_name(basename.name + '.0001')
-        self._fileinfo.append(_FileInfo(target, self._volume_size))
-        self._files.append(io.open(target, mode=self._mode))
-        self._positions = [0, self._volume_size]
+        if target.exists():
+            if self._mode in ['x', 'xb', 'xt']:
+                raise FileExistsError
+            elif self._mode in ['w', 'wb', 'wt']:
+                file = io.open(target, mode=self._mode)
+                self._files.append(file)
+                file.truncate(0)
+                self._fileinfo.append(_FileInfo(target, self._volume_size))
+                self._positions = [0, self._volume_size]
+            elif self._mode in ['a', 'ab', 'at']:
+                filenames = self._glob_files(basename)
+                if self._mode == 'ab':
+                    mode = 'rb'
+                else:
+                    mode = 'r'
+                pos = 0
+                self._positions = [0]
+                for i in range(len(filenames) - 2):
+                    file = io.open(filenames[i], mode)
+                    self._files.append(file)
+                    size = filenames[i].stat().st_size
+                    self._fileinfo.append(_FileInfo(filenames[i], size))
+                    pos += size
+                    self._positions.append(pos)
+                # last file
+                file = io.open(filenames[-1], mode=self._mode)
+                self._files.append(file)
+                size = filenames[-1].stat().st_size
+                self._fileinfo.append(_FileInfo(filenames[i], size))
+                pos += size
+                self._positions.append(pos)
+                file.seek(0, os.SEEK_END)
+                self._position = pos
+            else:
+                raise NotImplementedError
+        else:
+            file = io.open(target, mode=self._mode)
+            self._files.append(file)
+            self._fileinfo.append(_FileInfo(target, self._volume_size))
+            self._positions = [0, self._volume_size]
 
     def _current_index(self):
         for i in range(len(self._positions) - 1):
@@ -139,6 +176,8 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         self._positions.append(pos + self._volume_size)
 
     def close(self) -> None:
+        if self._closed:
+            return
         self._closed = True
         for file in self._files:
             file.close()
@@ -155,6 +194,8 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         return -1
 
     def flush(self) -> None:
+        if self._closed:
+            return
         if self._mode == 'wb' or self._mode == 'w':
             for file in self._files:
                 file.flush()
@@ -163,7 +204,9 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         return False
 
     def readable(self) -> bool:
-        return True
+        if self._closed:
+            return False
+        return all([f.readable() for f in self._files])
 
     def readline(self, size: int = -1) -> bytes:
         raise NotImplementedError
@@ -186,7 +229,10 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         file.seek(target - self._positions[i], io.SEEK_SET)
 
     def seekable(self):
-        return True
+        if self._mode in ['ab', 'at', 'a']:
+            return False
+        else:
+            return all([f.seekable() for f in self._files])
 
     def tell(self) -> int:
         return self._position
@@ -195,12 +241,13 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         raise NotImplementedError
 
     def writable(self) -> bool:
-        return True
+        return self._mode in ['wb', 'w', 'wt', 'x', 'xb', 'xt', 'ab', 'a', 'at']
 
     def writelines(self, lines):
         raise NotImplementedError
 
     def __del__(self):
+        # FIXME
         pass
 
     def __enter__(self):

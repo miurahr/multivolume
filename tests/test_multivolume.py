@@ -1,6 +1,9 @@
 import binascii
 import hashlib
 import os
+import shutil
+
+import pytest
 
 import multivolumefile as MV
 
@@ -37,6 +40,7 @@ def test_read_seek():
 def test_read_context():
     target = os.path.join(testdata_path, "archive.7z")
     with MV.open(target, mode='rb') as mv:
+        assert mv.readable()
         mv.seek(24900)
         data = mv.read(200)
         assert len(data) == 100
@@ -65,6 +69,7 @@ def test_read_boundary():
 def test_write(tmp_path):
     target = tmp_path.joinpath('target.7z')
     with MV.open(target, mode='wb', volume=10240) as volume:
+        assert volume.writable()
         with open(os.path.join(testdata_path, "archive.7z.001"), 'rb') as r:
             data = r.read(BLOCKSIZE)
             while len(data) > 0:
@@ -83,3 +88,35 @@ def test_write(tmp_path):
     created = tmp_path.joinpath('target.7z.0001')
     assert created.exists()
     assert created.stat().st_size == 10240
+
+
+def test_exclusive_write(tmp_path):
+    target = tmp_path.joinpath('target.7z')
+    with MV.open(target, mode='xb', volume=10240) as volume:
+        assert volume.writable()
+        with open(os.path.join(testdata_path, "archive.7z.001"), 'rb') as r:
+            data = r.read(BLOCKSIZE)
+            while len(data) > 0:
+                volume.write(data)
+                data = r.read(BLOCKSIZE)
+
+        with open(os.path.join(testdata_path, "archive.7z.002"), 'rb') as r:
+            data = r.read(BLOCKSIZE)
+            while len(data) > 0:
+                volume.write(data)
+                data = r.read(BLOCKSIZE)
+        assert volume.seekable()
+        volume.seek(0)
+        volume.seek(51000)
+        volume.flush()
+    created = tmp_path.joinpath('target.7z.0001')
+    assert created.exists()
+    assert created.stat().st_size == 10240
+
+
+def test_exclusive_write_exist(tmp_path):
+    target = tmp_path.joinpath('target.7z')
+    target_volume = tmp_path.joinpath('target.7z.0001')
+    shutil.copyfile(os.path.join(testdata_path, "archive.7z.001"), target_volume)
+    with pytest.raises(FileExistsError):
+        MV.open(target, 'x')
