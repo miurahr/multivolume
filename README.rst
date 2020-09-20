@@ -30,7 +30,7 @@ Usages
 
 .. code-block::
 
-    with multivolumefile.open('archive.7z', 'rb) as vol:
+    with multivolumefile.open('archive.7z', 'rb') as vol:
         data = vol.read(100)
         vol.seek(500)
 

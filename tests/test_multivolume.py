@@ -200,3 +200,20 @@ def test_write_append2(tmp_path):
     created4 = tmp_path.joinpath('target.7z.0004')
     assert created4.exists()
     assert created4.stat().st_size == 6857  # 52337 - 25000 - 10240 * 2
+
+
+def test_read_double_close():
+    target = os.path.join(testdata_path, "archive.7z")
+    mv = MV.open(target, mode='rb')
+    assert not mv.closed
+    mv.close()
+    assert mv.closed
+    mv.close()
+
+
+def test_read_fileno():
+    target = os.path.join(testdata_path, "archive.7z")
+    mv = MV.open(target, mode='rb')
+    with pytest.raises(RuntimeError):
+        mv.fileno()
+    mv.close()

@@ -184,10 +184,10 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
 
     def fileno(self) -> int:
         """
-        fileno() is incompatible with other implementation.
-        multivolume handle multiple file object so we cannot return single value
+        fileno() is incompatible with other implementations.
+        multivolume handle multiple file object so we cannot return single fd.
         """
-        return -1
+        raise RuntimeError('fileno() is not supported.')
 
     def flush(self) -> None:
         if self._closed:
