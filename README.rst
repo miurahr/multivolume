@@ -9,7 +9,18 @@ multivolumefile
   :target: https://github.com/miurahr/multivolume/actions
 
 MultiVolumefile is a python library to provide a file-object wrapping multiple files
-as virtually like as a single file.
+as virtually like as a single file. It inherit io.RawIOBase class and support some of
+its standard methods.
+
+See API details at `python library reference`_
+
+.. _`python library reference`: https://docs.python.org/3/library/io.html
+
+Status
+======
+
+multivolumefile module is under active development and considered as ***Alpha*** state.
+It is not good idea to use it on production systems.
 
 Install
 =======
@@ -47,6 +58,14 @@ Usages
 
 you will see file `archive.7z.001` are written.
 
+Limitations and known issues
+============================
+
+- fileno() is not supported and when call it, you will get RuntimeError exception.
+
+- Extension of volume name is currently 4-digit of decimal number, start from 1, such as '0001', '0002' and so on.
+
+- ***Caution***: When globbing existent volumes, it glob all files other than 4-digit extensions, it may break your data.
 
 Contribution
 ============
