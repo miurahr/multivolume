@@ -21,12 +21,11 @@ import contextlib
 import io
 import os
 import pathlib
-import re
 from typing import List, Union
 
 
-def open(name: Union[pathlib.Path, str], mode=None, volume=None) -> io.RawIOBase:
-    return MultiVolume(name, mode=mode, volume=volume)
+def open(name: Union[pathlib.Path, str], mode=None, volume=None) -> io.BufferedIOBase:
+    return BufferedMultiVolumeIO(name, mode=mode, volume=volume)
 
 
 class _FileInfo:
@@ -35,7 +34,7 @@ class _FileInfo:
         self.size = size
 
 
-class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
+class MultiVolumeIO(io.RawIOBase, contextlib.AbstractContextManager):
 
     def __init__(self, basename: Union[pathlib.Path, str], mode=None, volume=None):
         self._mode = mode
@@ -166,7 +165,12 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         last = self._fileinfo[-1].filename
         assert last.suffix.endswith(r".{0:04d}".format(len(self._fileinfo)))
         next = last.with_suffix(r".{0:04d}".format(len(self._fileinfo) + 1))
-        self._files.append(io.open(next, self._mode))
+        if next.exists():
+            nextfile = next.open(mode=self._mode)
+            nextfile.truncate(0)
+            self._files.append(nextfile)
+        else:
+            self._files.append(next.open(mode=self._mode))
         self._fileinfo.append(_FileInfo(next, self._volume_size))
         pos = self._positions[-1]
         self._positions.append(pos + self._volume_size)
@@ -251,3 +255,28 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+
+class BufferedMultiVolumeIO(io.BufferedIOBase, MultiVolumeIO):
+
+    def read1(self, size: int = 1):
+        current = self._current_index()
+        file = self._files[current]
+        data = file.read(size)  # FIXME: when return 0 size, we have alwady called read() system call.
+        if len(data) == 0 and current < len(self._files) - 1:
+            current = self._current_index()
+            file = self._files[current]
+            file.seek(0)
+            data += file.read(size)
+        self._position += len(data)
+        return data
+
+    def readinto1(self, b: Union[bytes, bytearray, memoryview]):
+        length = len(b)
+        data = self.read1(length)
+        b[:len(data)] = data
+        return len(data)
+
+    def detach(self):
+        for file in self._files:
+            file.detatch()
