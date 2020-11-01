@@ -21,7 +21,6 @@ import contextlib
 import io
 import os
 import pathlib
-import re
 from typing import List, Union
 
 
@@ -37,16 +36,20 @@ class _FileInfo:
 
 class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
 
-    def __init__(self, basename: Union[pathlib.Path, str], mode=None, volume=None):
+    def __init__(self, basename: Union[pathlib.Path, str], mode: str = 'r',
+                 *, volume: int = None, ext_digits: int = 4, hex: bool = False, ext_start: int = 1):
         self._mode = mode
         self._closed = False
         self._files = []  # type: List[object]
         self._fileinfo = []  # type: List[_FileInfo]
         self._position = 0
         self._positions = []
+        self._digits = ext_digits
+        self._start = ext_start
+        self._hex = hex
         if mode in ['rb', 'r', 'rt']:
             self._init_reader(basename)
-        elif mode in ['wb',  'w', 'wt', 'xb', 'x', 'xt', 'ab', 'a', 'at']:
+        elif mode in ['wb', 'w', 'wt', 'xb', 'x', 'xt', 'ab', 'a', 'at']:
             if volume is None:
                 self._volume_size = 10 * 1024 * 1024  # set default to 10MBytes
             else:
@@ -75,7 +78,8 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
     def _init_writer(self, basename):
         if isinstance(basename, str):
             basename = pathlib.Path(basename)
-        target = basename.with_name(basename.name + '.0001')
+        ext = '.{num:0{ext_digit}d}'.format(num=self._start, ext_digit=self._digits)
+        target = basename.with_name(basename.name + ext)
         if target.exists():
             if self._mode in ['x', 'xb', 'xt']:
                 raise FileExistsError
@@ -163,9 +167,18 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         self._position += len(b)
 
     def _add_volume(self):
-        last = self._fileinfo[-1].filename
-        assert last.suffix.endswith(r".{0:04d}".format(len(self._fileinfo)))
-        next = last.with_suffix(r".{0:04d}".format(len(self._fileinfo) + 1))
+        if self._hex:
+            last = self._fileinfo[-1].filename
+            last_ext = '.{num:0{ext_digit}x}'.format(num=len(self._fileinfo), ext_digit=self._digits)
+            assert last.suffix.endswith(last_ext)
+            next_ext = '.{num:0{ext_digit}x}'.format(num=len(self._fileinfo) + 1, ext_digit=self._digits)
+            next = last.with_suffix(next_ext)
+        else:
+            last = self._fileinfo[-1].filename
+            last_ext = '.{num:0{ext_digit}d}'.format(num=len(self._fileinfo), ext_digit=self._digits)
+            assert last.suffix.endswith(last_ext)
+            next_ext = '.{num:0{ext_digit}d}'.format(num=len(self._fileinfo) + 1, ext_digit=self._digits)
+            next = last.with_suffix(next_ext)
         self._files.append(io.open(next, self._mode))
         self._fileinfo.append(_FileInfo(next, self._volume_size))
         pos = self._positions[-1]
