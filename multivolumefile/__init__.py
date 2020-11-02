@@ -167,17 +167,18 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         self._position += len(b)
 
     def _add_volume(self):
+        num = len(self._fileinfo) + self._start - 1
         if self._hex:
             last = self._fileinfo[-1].filename
-            last_ext = '.{num:0{ext_digit}x}'.format(num=len(self._fileinfo), ext_digit=self._digits)
+            last_ext = '.{num:0{ext_digit}x}'.format(num=num, ext_digit=self._digits)
             assert last.suffix.endswith(last_ext)
-            next_ext = '.{num:0{ext_digit}x}'.format(num=len(self._fileinfo) + 1, ext_digit=self._digits)
+            next_ext = '.{num:0{ext_digit}x}'.format(num=num + 1, ext_digit=self._digits)
             next = last.with_suffix(next_ext)
         else:
             last = self._fileinfo[-1].filename
-            last_ext = '.{num:0{ext_digit}d}'.format(num=len(self._fileinfo), ext_digit=self._digits)
+            last_ext = '.{num:0{ext_digit}d}'.format(num=num, ext_digit=self._digits)
             assert last.suffix.endswith(last_ext)
-            next_ext = '.{num:0{ext_digit}d}'.format(num=len(self._fileinfo) + 1, ext_digit=self._digits)
+            next_ext = '.{num:0{ext_digit}d}'.format(num=num + 1, ext_digit=self._digits)
             next = last.with_suffix(next_ext)
         self._files.append(io.open(next, self._mode))
         self._fileinfo.append(_FileInfo(next, self._volume_size))
