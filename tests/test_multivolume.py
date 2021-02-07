@@ -236,7 +236,7 @@ def test_write_short_digits(tmp_path):
 
 def test_write_hex_digits(tmp_path):
     target = tmp_path.joinpath('target.7z')
-    with MV.MultiVolume(target, mode='wb', volume=1000, hex=True, ext_digits=3, ext_start=0) as volume:
+    with MV.MultiVolume(target, mode='wb', volume=800, hex=True, ext_digits=3, ext_start=0) as volume:
         assert volume.writable()
         with open(os.path.join(testdata_path, "archive.7z.001"), 'rb') as r:
             for _ in range(5):
@@ -245,6 +245,6 @@ def test_write_hex_digits(tmp_path):
             data = r.read(250)
             volume.write(data)
         volume.flush()
-    created = tmp_path.joinpath('target.7z.00a')
+    created = tmp_path.joinpath('target.7z.00c')
     assert created.exists()
-    assert created.stat().st_size == 250
+    assert created.stat().st_size == 650

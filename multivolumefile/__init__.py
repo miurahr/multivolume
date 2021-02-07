@@ -159,12 +159,13 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
             if current == len(self._files) - 1:
                 self._add_volume()
             file.write(b[:self._volume_size - pos])
+            self._position += self._volume_size - pos
             file = self._files[current + 1]
             file.seek(0)
-            file.write(b[self._volume_size - pos:])
+            self.write(b[self._volume_size - pos:])  # recursive call
         else:
             file.write(b)
-        self._position += len(b)
+            self._position += len(b)
 
     def _add_volume(self):
         num = len(self._fileinfo) + self._start - 1
