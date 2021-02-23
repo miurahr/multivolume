@@ -27,14 +27,20 @@ def test_read_check_sha1():
 def test_read_seek():
     target = os.path.join(testdata_path, "archive.7z")
     mv = MV.open(target, mode='rb')
+    assert mv.isatty() == False
     assert mv.seekable()
     mv.seek(40000)
     pos = mv.tell()
     assert pos == 40000
-    mv.seek(3000)
+    mv.seek(-1000,os.SEEK_CUR)
     pos = mv.tell()
-    assert pos == 3000
+    assert pos == 39000
+    mv.seek(-2337, os.SEEK_END)
+    pos = mv.tell()
+    assert pos == 50000
     mv.close()
+    assert mv.readable() == False
+    mv.flush()
 
 
 def test_read_context():
