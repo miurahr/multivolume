@@ -82,6 +82,21 @@ def test_readinto_boundary():
     assert sha.digest() == b'6\xbc\x92\n\xa53tY\x97\xaa`!\xf3\xa7\xaa\xc3\\V\xac\xc1p\x97\xb0\xf5M\xc0)\x12\x0eD$\x9a'
 
 
+def test_readline():
+    target = os.path.join(testdata_path, "archive.7z")
+    with pytest.raises(NotImplementedError):
+        with MV.open(target, mode='rb') as mv:
+            line = mv.readline()
+
+
+def test_readlines():
+    target = os.path.join(testdata_path, "archive.7z")
+    with pytest.raises(NotImplementedError):
+        with MV.open(target, mode='rb') as mv:
+            for line in mv.readlines():
+                pass
+
+
 def test_write(tmp_path):
     target = tmp_path.joinpath('target.7z')
     with MV.open(target, mode='wb', volume=10240) as volume:
