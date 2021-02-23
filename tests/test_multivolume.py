@@ -90,6 +90,30 @@ def test_write(tmp_path):
     assert created.stat().st_size == 10240
 
 
+def test_write_posixpath(tmp_path):
+    target = tmp_path.joinpath('target.7z').as_posix()
+    with MV.open(target, mode='wb', volume=10240) as volume:
+        assert volume.writable()
+        with open(os.path.join(testdata_path, "archive.7z.001"), 'rb') as r:
+            data = r.read(BLOCKSIZE)
+            while len(data) > 0:
+                volume.write(data)
+                data = r.read(BLOCKSIZE)
+
+        with open(os.path.join(testdata_path, "archive.7z.002"), 'rb') as r:
+            data = r.read(BLOCKSIZE)
+            while len(data) > 0:
+                volume.write(data)
+                data = r.read(BLOCKSIZE)
+        assert volume.seekable()
+        volume.seek(0)
+        volume.seek(51000)
+        volume.flush()
+    created = tmp_path.joinpath('target.7z.0001')
+    assert created.exists()
+    assert created.stat().st_size == 10240
+
+
 def test_write_boundary(tmp_path):
     target = tmp_path.joinpath('target.7z')
     with MV.open(target, mode='wb', volume=10240) as volume:
@@ -251,3 +275,10 @@ def test_write_hex_digits(tmp_path):
     created = tmp_path.joinpath('target.7z.00c')
     assert created.exists()
     assert created.stat().st_size == 650
+
+
+def test_unsupported_open_mode(tmp_path):
+    target = tmp_path.joinpath('target.7z')
+    with pytest.raises(NotImplementedError):
+        with MV.MultiVolume(target, mode='qb', volume=800):
+            pass
