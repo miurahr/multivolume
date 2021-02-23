@@ -25,6 +25,24 @@ Removed
 Security
 --------
 
+`v0.2.0`_
+=========
+
+Added
+-----
+
+* Type hint information bundled.
+
+Fixed
+-----
+
+* Seek() returns current position.
+
+Changed
+-------
+
+* Explanation of unsupported methods an modes in README
+
 `v0.1.4`_
 =========
 
@@ -32,7 +50,6 @@ Fixed
 -----
 
 * Fix append mode bug.
-
 
 `v0.1.3`_
 =========
@@ -42,8 +59,6 @@ Fixed
 
 * Fix added volume size become wrong
 
-
-
 `v0.1.2`_
 =========
 
@@ -51,7 +66,6 @@ Fixed
 -----
 
 * Fix append mode (#1)
-
 
 `v0.1.1`_
 =========
@@ -78,7 +92,6 @@ Changed
 
 * Change API: file argument of 'r' and 'rb' now single basename instead of list of files
 
-
 `v0.0.5`_
 =========
 
@@ -86,7 +99,8 @@ Changed
 * Support read functions.
 
 .. History links
-.. _Unreleased: https://github.com/miurahr/py7zr/compare/v0.1.4...HEAD
+.. _Unreleased: https://github.com/miurahr/py7zr/compare/v0.2.0...HEAD
+.. _v0.2.0: https://github.com/miurahr/py7zr/compare/v0.1.4...v0.2.0
 .. _v0.1.4: https://github.com/miurahr/py7zr/compare/v0.1.3...v0.1.4
 .. _v0.1.3: https://github.com/miurahr/py7zr/compare/v0.1.2...v0.1.3
 .. _v0.1.2: https://github.com/miurahr/py7zr/compare/v0.1.1...v0.1.2
