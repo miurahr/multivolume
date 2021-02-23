@@ -60,11 +60,9 @@ def test_readinto():
 def test_read_boundary():
     target = os.path.join(testdata_path, "archive.7z")
     with MV.open(target, mode='rb') as mv:
-        mv.seek(25000)
+        mv.seek(24999)
         b = mv.read(200)
-        assert len(b) == 200
-    sha = hashlib.sha256(b)
-    assert sha.digest() == b'6\xbc\x92\n\xa53tY\x97\xaa`!\xf3\xa7\xaa\xc3\\V\xac\xc1p\x97\xb0\xf5M\xc0)\x12\x0eD$\x9a'
+        assert len(b) == 1
 
 
 def test_readinto_boundary():

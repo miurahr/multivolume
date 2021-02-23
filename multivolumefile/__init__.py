@@ -136,11 +136,6 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         current = self._current_index()
         file = self._files[current]
         data = file.read(size)
-        if len(data) == 0 and current < len(self._files) - 1:
-            current = self._current_index()
-            file = self._files[current]
-            file.seek(0)
-            data += file.read(size)
         self._position += len(data)
         return data
 
