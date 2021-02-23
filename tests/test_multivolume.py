@@ -160,6 +160,9 @@ def test_write_append1(tmp_path):
     #
     target = tmp_path.joinpath('target.7z')
     with MV.open(target, mode='ab', volume=10240) as volume:
+        with open(os.path.join(testdata_path, "archive.7z.001"), 'rb') as src:
+            src.seek(1000)
+            volume.write(src.read(24000))
         with open(os.path.join(testdata_path, "archive.7z.002"), 'rb') as r:
             data = r.read(BLOCKSIZE)
             while len(data) > 0:
@@ -173,9 +176,9 @@ def test_write_append1(tmp_path):
     created2 = tmp_path.joinpath('target.7z.0002')
     assert created2.exists()
     assert created2.stat().st_size == 10240
-    created3 = tmp_path.joinpath('target.7z.0003')
-    assert created3.exists()
-    assert created3.stat().st_size == 7857  # 27337 + 1000 - 10240 * 2
+    created6 = tmp_path.joinpath('target.7z.0006')
+    assert created6.exists()
+    assert created6.stat().st_size == 1137
 
 
 def test_write_append2(tmp_path):

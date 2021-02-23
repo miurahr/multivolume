@@ -156,10 +156,10 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         file = self._files[current]
         pos = file.tell()
         if pos + len(b) > self._volume_size:
-            if current == len(self._files) - 1:
-                self._add_volume()
             file.write(b[:self._volume_size - pos])
             self._position += self._volume_size - pos
+            if current == len(self._files) - 1:
+                self._add_volume()
             file = self._files[current + 1]
             file.seek(0)
             self.write(b[self._volume_size - pos:])  # recursive call
@@ -184,7 +184,9 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         self._files.append(io.open(next, self._mode))
         self._fileinfo.append(_FileInfo(next, self._volume_size))
         pos = self._positions[-1]
-        self._positions.append(pos + self._volume_size)
+        if pos != self._position:
+            self._positions[-1] = self._position
+        self._positions.append(self._positions[-1] + self._volume_size)
 
     def close(self) -> None:
         if self._closed:
