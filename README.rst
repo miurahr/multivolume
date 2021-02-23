@@ -20,7 +20,9 @@ Status
 ======
 
 multivolumefile module is under active development and considered as ***Alpha*** state.
-It is not good idea to use it on production systems.
+It is not good idea to use it on production systems, but it may work well in a limited range
+of usage. Please check limitations and passed test cases.
+
 
 Install
 =======
@@ -62,16 +64,15 @@ Limitations and known issues
 ============================
 
 - fileno() is not supported and when call it, you will get RuntimeError exception.
-
-- Extension of volume name is currently 4-digit of decimal number, start from 1, such as '0001', '0002' and so on.
+- THere are several non-implemented functions such as truncate() and writeline() that will raise NotimplementedError
 
 - ***Caution***: When globbing existent volumes, it glob all files other than 4-digit extensions, it may break your data.
+
 
 Contribution
 ============
 
-You are welcome to contribute the project, as usual on github projects,
-Pull-Request are welcome.
+You are welcome to contribute the project, as usual on github projects, Pull-Requests are always welcome.
 
 License
 =======
