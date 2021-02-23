@@ -65,7 +65,7 @@ Limitations and known issues
 
 - fileno() is not supported and when call it, you will get RuntimeError exception.
 - There are several non-implemented functions such as truncate() and writeline() that will raise NotimplementedError
-- There are several non-implemented functions such as readlines(), readline() and read().
+- There are several non-implemented functions such as readlines(), readline() and readall().
 - Text mode is not implemented.
 - ***Caution***: When globbing existent volumes, it glob all files other than 4-digit extensions, it may break your data.
 
