@@ -222,6 +222,7 @@ def test_write_append1(tmp_path):
     #
     target = tmp_path.joinpath('target.7z')
     with MV.open(target, mode='ab', volume=10240) as volume:
+        assert volume.seekable() == False
         with open(os.path.join(testdata_path, "archive.7z.001"), 'rb') as src:
             src.seek(1000)
             volume.write(src.read(24000))
