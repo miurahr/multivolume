@@ -86,15 +86,21 @@ def test_readline():
     target = os.path.join(testdata_path, "archive.7z")
     with pytest.raises(NotImplementedError):
         with MV.open(target, mode='rb') as mv:
-            line = mv.readline()
+            mv.readline()
 
 
 def test_readlines():
     target = os.path.join(testdata_path, "archive.7z")
     with pytest.raises(NotImplementedError):
         with MV.open(target, mode='rb') as mv:
-            for line in mv.readlines():
-                pass
+            mv.readlines()
+
+
+def test_readall():
+    target = os.path.join(testdata_path, "archive.7z")
+    with pytest.raises(NotImplementedError):
+        with MV.open(target, mode='rb') as mv:
+            mv.readall()
 
 
 def test_write(tmp_path):
