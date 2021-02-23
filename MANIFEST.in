@@ -1,7 +1,7 @@
 include *.py
+include *.pyi
 include *.rst
 include LICENSE
 include tox.ini
 recursive-include tests *.py
 recursive-include tests *.00?
-

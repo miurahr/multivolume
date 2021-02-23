@@ -90,6 +90,28 @@ def test_write(tmp_path):
     assert created.stat().st_size == 10240
 
 
+def test_write_default_volume(tmp_path):
+    target = tmp_path.joinpath('target.7z').as_posix()
+    with MV.open(target, mode='wb') as volume:
+        with open(os.path.join(testdata_path, "archive.7z.001"), 'rb') as r:
+            data = r.read(BLOCKSIZE)
+            while len(data) > 0:
+                volume.write(data)
+                data = r.read(BLOCKSIZE)
+        with open(os.path.join(testdata_path, "archive.7z.002"), 'rb') as r:
+            data = r.read(BLOCKSIZE)
+            while len(data) > 0:
+                volume.write(data)
+                data = r.read(BLOCKSIZE)
+        assert volume.seekable()
+        volume.seek(0)
+        volume.seek(51000)
+        volume.flush()
+    created = tmp_path.joinpath('target.7z.0001')
+    assert created.exists()
+    assert created.stat().st_size == 52337
+
+
 def test_write_posixpath(tmp_path):
     target = tmp_path.joinpath('target.7z').as_posix()
     with MV.open(target, mode='wb', volume=10240) as volume:

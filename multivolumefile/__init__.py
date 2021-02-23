@@ -21,7 +21,8 @@ import contextlib
 import io
 import os
 import pathlib
-from typing import List, Union
+from mmap import mmap
+from typing import Any, Container, List, Optional, Union
 
 
 def open(name: Union[pathlib.Path, str], mode=None, volume=None) -> io.RawIOBase:
@@ -36,8 +37,9 @@ class _FileInfo:
 
 class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
 
-    def __init__(self, basename: Union[pathlib.Path, str], mode: str = 'r',
-                 *, volume: int = None, ext_digits: int = 4, hex: bool = False, ext_start: int = 1):
+    def __init__(self, basename: Union[pathlib.Path, str], mode: Optional[str] = 'r',
+                 *, volume: Optional[int] = None, ext_digits: Optional[int] = 4, hex: Optional[bool] = False,
+                 ext_start: Optional[int] = 1):
         self._mode = mode
         self._closed = False
         self._files = []  # type: List[object]
@@ -145,13 +147,13 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
     def readall(self) -> bytes:
         raise NotImplementedError
 
-    def readinto(self, b: Union[bytes, bytearray, memoryview]):
+    def readinto(self, b: Union[bytearray, memoryview, Container[Any], mmap]) -> int:
         length = len(b)
         data = self.read(length)
         b[:len(data)] = data
         return len(data)
 
-    def write(self, b: Union[bytes, bytearray, memoryview]):
+    def write(self, b: Union[bytes, bytearray, memoryview, Container[Any], mmap]) -> None:
         current = self._current_index()
         file = self._files[current]
         pos = file.tell()
@@ -221,13 +223,13 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
             return False
         return all([f.readable() for f in self._files])
 
-    def readline(self, size: int = -1) -> bytes:
+    def readline(self, size: Optional[int] = -1) -> bytes:
         raise NotImplementedError
 
     def readlines(self, hint: int = -1) -> List[bytes]:
         raise NotImplementedError
 
-    def seek(self, offset, whence=io.SEEK_SET):
+    def seek(self, offset: int, whence: Optional[int] = io.SEEK_SET) -> int:
         if whence == io.SEEK_SET:
             target = offset
         elif whence == io.SEEK_CUR:
@@ -240,8 +242,9 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
             i -= 1
         file = self._files[i]
         file.seek(target - self._positions[i], io.SEEK_SET)
+        return self._position
 
-    def seekable(self):
+    def seekable(self) -> bool:
         if self._mode in ['ab', 'at', 'a']:
             return False
         else:
@@ -250,7 +253,7 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
     def tell(self) -> int:
         return self._position
 
-    def truncate(self, size=None):
+    def truncate(self, size: Optional[int] = None) -> int:
         raise NotImplementedError
 
     def writable(self) -> bool:
