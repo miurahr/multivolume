@@ -342,3 +342,15 @@ def test_unsupported_open_mode(tmp_path):
     with pytest.raises(NotImplementedError):
         with MV.MultiVolume(target, mode='qb', volume=800):
             pass
+
+
+def test_stat():
+    target = os.path.join(testdata_path, "archive.7z")
+    first_target = os.path.join(testdata_path, "archive.7z.001")
+    with MV.open(target, mode='rb') as mv:
+        st = mv.stat()
+        assert st.st_size == 52337
+        assert st.st_mtime == os.stat(first_target).st_mtime
+        assert st.st_mtime_ns == os.stat(first_target).st_mtime_ns
+        assert st.st_dev == os.stat(first_target).st_dev
+        assert st.st_ino == 0

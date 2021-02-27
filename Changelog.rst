@@ -25,6 +25,17 @@ Removed
 Security
 --------
 
+`v0.2.1`_
+=========
+
+Added
+-----
+
+* Add `name` property that indicate basename of volumes
+* Add `stat()` that return `stat_result` which has as mostly same methods as `os.stat_result` class
+  except for platform dependent methods.
+
+
 `v0.2.0`_
 =========
 

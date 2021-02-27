@@ -24,14 +24,19 @@ import pathlib
 from mmap import mmap
 from typing import Any, Container, List, Optional, Union
 
+from .stat import stat_result
+
+__all__ = ['stat_result', 'open', 'MultiVolume']
+
 
 def open(name: Union[pathlib.Path, str], mode=None, volume=None) -> io.RawIOBase:
     return MultiVolume(name, mode=mode, volume=volume)
 
 
 class _FileInfo:
-    def __init__(self, filename, size):
+    def __init__(self, filename, stat, size):
         self.filename = filename
+        self.stat = stat
         self.size = size
 
 
@@ -49,6 +54,7 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         self._digits = ext_digits
         self._start = ext_start
         self._hex = hex
+        self.name = str(basename)
         if mode in ['rb', 'r', 'rt']:
             self._init_reader(basename)
         elif mode in ['wb', 'w', 'wt', 'xb', 'x', 'xt', 'ab', 'a', 'at']:
@@ -71,8 +77,9 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         self._positions.append(pos)
         filenames = self._glob_files(basename)
         for name in filenames:
+            stat = os.stat(name)
             size = os.stat(name).st_size
-            self._fileinfo.append(_FileInfo(name, size))
+            self._fileinfo.append(_FileInfo(name, stat, size))
             self._files.append(io.open(name, mode=self._mode))
             pos += size
             self._positions.append(pos)
@@ -89,7 +96,8 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
                 file = io.open(target, mode=self._mode)
                 self._files.append(file)
                 file.truncate(0)
-                self._fileinfo.append(_FileInfo(target, self._volume_size))
+                stat = os.stat(target)
+                self._fileinfo.append(_FileInfo(target, stat, self._volume_size))
                 self._positions = [0, self._volume_size]
             elif self._mode in ['a', 'ab', 'at']:
                 filenames = self._glob_files(basename)
@@ -103,8 +111,9 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
                 for i in range(len(filenames)):
                     file = io.open(filenames[i], mode)
                     self._files.append(file)
-                    size = filenames[i].stat().st_size
-                    self._fileinfo.append(_FileInfo(filenames[i], size))
+                    stat = filenames[i].stat()
+                    size = stat.st_size
+                    self._fileinfo.append(_FileInfo(filenames[i], stat, size))
                     pos += size
                     self._positions.append(pos)
                     self._position = pos
@@ -119,7 +128,7 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         else:
             file = io.open(target, mode=self._mode)
             self._files.append(file)
-            self._fileinfo.append(_FileInfo(target, self._volume_size))
+            self._fileinfo.append(_FileInfo(target, os.stat(target), self._volume_size))
             self._positions = [0, self._volume_size]
 
     def _current_index(self):
@@ -179,7 +188,8 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
             next_ext = '.{num:0{ext_digit}d}'.format(num=num + 1, ext_digit=self._digits)
             next = last.with_suffix(next_ext)
         self._files.append(io.open(next, self._mode))
-        self._fileinfo.append(_FileInfo(next, self._volume_size))
+        stat = os.stat(next)
+        self._fileinfo.append(_FileInfo(next, stat, self._volume_size))
         pos = self._positions[-1]
         if pos != self._position:
             self._positions[-1] = self._position
@@ -256,6 +266,12 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
 
     def writelines(self, lines):
         raise NotImplementedError
+
+    def stat(self) -> stat_result:
+        totalsize = 0
+        for fi in self._fileinfo:
+            totalsize += fi.size
+        return stat_result(self._fileinfo[0].stat, totalsize)
 
     def __del__(self):
         # FIXME
