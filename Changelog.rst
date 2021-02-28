@@ -25,6 +25,15 @@ Removed
 Security
 --------
 
+`v0.2.2`_
+=========
+
+Added
+-----
+
+* Add py.typed file for type hinting.
+
+
 `v0.2.1`_
 =========
 
@@ -110,7 +119,8 @@ Changed
 * Support read functions.
 
 .. History links
-.. _Unreleased: https://github.com/miurahr/py7zr/compare/v0.2.1...HEAD
+.. _Unreleased: https://github.com/miurahr/py7zr/compare/v0.2.2...HEAD
+.. _v0.2.2: https://github.com/miurahr/py7zr/compare/v0.2.1...v0.2.2
 .. _v0.2.1: https://github.com/miurahr/py7zr/compare/v0.2.0...v0.2.1
 .. _v0.2.0: https://github.com/miurahr/py7zr/compare/v0.1.4...v0.2.0
 .. _v0.1.4: https://github.com/miurahr/py7zr/compare/v0.1.3...v0.1.4
