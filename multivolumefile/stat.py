@@ -1,7 +1,4 @@
-
-
 class stat_result:
-
     def __init__(self, stat, size):
         self._stat = stat
         self._size = size

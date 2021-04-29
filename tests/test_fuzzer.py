@@ -13,7 +13,7 @@ import multivolumefile as MV
 counter = 0
 
 
-@fixture(scope='session')
+@fixture(scope="session")
 def basepath(tmp_path_factory):
     return tmp_path_factory.getbasetemp()
 

@@ -26,7 +26,7 @@ from typing import Any, Container, List, Optional, Union
 
 from .stat import stat_result
 
-__all__ = ['stat_result', 'open', 'MultiVolume']
+__all__ = ["stat_result", "open", "MultiVolume"]
 
 BLOCKSIZE = 16384
 
@@ -43,10 +43,16 @@ class _FileInfo:
 
 
 class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
-
-    def __init__(self, basename: Union[pathlib.Path, str], mode: Optional[str] = 'r',
-                 *, volume: Optional[int] = None, ext_digits: Optional[int] = 4, hex: Optional[bool] = False,
-                 ext_start: Optional[int] = 1):
+    def __init__(
+        self,
+        basename: Union[pathlib.Path, str],
+        mode: Optional[str] = "r",
+        *,
+        volume: Optional[int] = None,
+        ext_digits: Optional[int] = 4,
+        hex: Optional[bool] = False,
+        ext_start: Optional[int] = 1
+    ):
         self._mode = mode
         self._closed = False
         self._files = []  # type: List[object]
@@ -57,9 +63,9 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         self._start = ext_start
         self._hex = hex
         self.name = str(basename)
-        if mode in ['rb', 'r', 'rt']:
+        if mode in ["rb", "r", "rt"]:
             self._init_reader(basename)
-        elif mode in ['wb', 'w', 'wt', 'xb', 'x', 'xt', 'ab', 'a', 'at']:
+        elif mode in ["wb", "w", "wt", "xb", "x", "xt", "ab", "a", "at"]:
             if volume is None:
                 self._volume_size = 10 * 1024 * 1024  # set default to 10MBytes
             else:
@@ -71,7 +77,7 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
     def _glob_files(self, basename):
         if isinstance(basename, str):
             basename = pathlib.Path(basename)
-        files = basename.parent.glob(basename.name + '.*')
+        files = basename.parent.glob(basename.name + ".*")
         return sorted(files)
 
     def _init_reader(self, basename):
@@ -89,24 +95,24 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
     def _init_writer(self, basename):
         if isinstance(basename, str):
             basename = pathlib.Path(basename)
-        ext = '.{num:0{ext_digit}d}'.format(num=self._start, ext_digit=self._digits)
+        ext = ".{num:0{ext_digit}d}".format(num=self._start, ext_digit=self._digits)
         target = basename.with_name(basename.name + ext)
         if target.exists():
-            if self._mode in ['x', 'xb', 'xt']:
+            if self._mode in ["x", "xb", "xt"]:
                 raise FileExistsError
-            elif self._mode in ['w', 'wb', 'wt']:
+            elif self._mode in ["w", "wb", "wt"]:
                 file = io.open(target, mode=self._mode)
                 self._files.append(file)
                 file.truncate(0)
                 stat = os.stat(target)
                 self._fileinfo.append(_FileInfo(target, stat, self._volume_size))
                 self._positions = [0, self._volume_size]
-            elif self._mode in ['a', 'ab', 'at']:
+            elif self._mode in ["a", "ab", "at"]:
                 filenames = self._glob_files(basename)
-                if self._mode == 'ab':
-                    mode = 'rb'
+                if self._mode == "ab":
+                    mode = "rb"
                 else:
-                    mode = 'r'
+                    mode = "r"
                 pos = 0
                 size = 0
                 self._positions = [0]
@@ -124,7 +130,9 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
                     self._add_volume()
                 else:
                     self._files[-1].close()
-                    self._files[-1] = io.open(filenames[len(filenames) - 1], mode=self._mode)
+                    self._files[-1] = io.open(
+                        filenames[len(filenames) - 1], mode=self._mode
+                    )
             else:
                 raise NotImplementedError
         else:
@@ -163,21 +171,23 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
     def readinto(self, b: Union[bytearray, memoryview, Container[Any], mmap]) -> int:
         size = len(b)
         data = self.read(size)
-        b[:len(data)] = data
+        b[: len(data)] = data
         return len(data)
 
-    def write(self, b: Union[bytes, bytearray, memoryview, Container[Any], mmap]) -> None:
+    def write(
+        self, b: Union[bytes, bytearray, memoryview, Container[Any], mmap]
+    ) -> None:
         current = self._current_index()
         file = self._files[current]
         pos = file.tell()
         if pos + len(b) > self._volume_size:
-            file.write(b[:self._volume_size - pos])
+            file.write(b[: self._volume_size - pos])
             self._position += self._volume_size - pos
             if current == len(self._files) - 1:
                 self._add_volume()
             file = self._files[current + 1]
             file.seek(0)
-            self.write(b[self._volume_size - pos:])  # recursive call
+            self.write(b[self._volume_size - pos :])  # recursive call
         else:
             file.write(b)
             self._position += len(b)
@@ -186,15 +196,19 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         num = len(self._fileinfo) + self._start - 1
         if self._hex:
             last = self._fileinfo[-1].filename
-            last_ext = '.{num:0{ext_digit}x}'.format(num=num, ext_digit=self._digits)
+            last_ext = ".{num:0{ext_digit}x}".format(num=num, ext_digit=self._digits)
             assert last.suffix.endswith(last_ext)
-            next_ext = '.{num:0{ext_digit}x}'.format(num=num + 1, ext_digit=self._digits)
+            next_ext = ".{num:0{ext_digit}x}".format(
+                num=num + 1, ext_digit=self._digits
+            )
             next = last.with_suffix(next_ext)
         else:
             last = self._fileinfo[-1].filename
-            last_ext = '.{num:0{ext_digit}d}'.format(num=num, ext_digit=self._digits)
+            last_ext = ".{num:0{ext_digit}d}".format(num=num, ext_digit=self._digits)
             assert last.suffix.endswith(last_ext)
-            next_ext = '.{num:0{ext_digit}d}'.format(num=num + 1, ext_digit=self._digits)
+            next_ext = ".{num:0{ext_digit}d}".format(
+                num=num + 1, ext_digit=self._digits
+            )
             next = last.with_suffix(next_ext)
         self._files.append(io.open(next, self._mode))
         stat = os.stat(next)
@@ -220,12 +234,12 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         fileno() is incompatible with other implementations.
         multivolume handle multiple file object so we cannot return single fd.
         """
-        raise RuntimeError('fileno() is not supported.')
+        raise RuntimeError("fileno() is not supported.")
 
     def flush(self) -> None:
         if self._closed:
             return
-        if self._mode == 'wb' or self._mode == 'w':
+        if self._mode == "wb" or self._mode == "w":
             for file in self._files:
                 file.flush()
 
@@ -259,7 +273,7 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         return self._position
 
     def seekable(self) -> bool:
-        if self._mode in ['ab', 'at', 'a']:
+        if self._mode in ["ab", "at", "a"]:
             return False
         else:
             return all([f.seekable() for f in self._files])
@@ -271,7 +285,7 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         raise NotImplementedError
 
     def writable(self) -> bool:
-        return self._mode in ['wb', 'w', 'wt', 'x', 'xb', 'xt', 'ab', 'a', 'at']
+        return self._mode in ["wb", "w", "wt", "x", "xb", "xt", "ab", "a", "at"]
 
     def writelines(self, lines):
         raise NotImplementedError
