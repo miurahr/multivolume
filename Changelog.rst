@@ -25,6 +25,18 @@ Removed
 Security
 --------
 
+`v0.2.3`_
+=========
+
+Added
+-----
+* implement readall()
+
+Chnaged
+-------
+* lint with black
+
+
 `v0.2.2`_
 =========
 
