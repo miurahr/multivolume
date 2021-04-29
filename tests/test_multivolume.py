@@ -98,9 +98,10 @@ def test_readlines():
 
 def test_readall():
     target = os.path.join(testdata_path, "archive.7z")
-    with pytest.raises(NotImplementedError):
-        with MV.open(target, mode='rb') as mv:
-            mv.readall()
+    with MV.open(target, mode='rb') as mv:
+        b = mv.readall()
+    sha = hashlib.sha256(b)
+    assert sha.digest() == binascii.unhexlify('e0cfeb8010d105d0e2d56d2f94d2b786ead352cef5bca579cb7689d08b3614d1')
 
 
 def test_write(tmp_path):

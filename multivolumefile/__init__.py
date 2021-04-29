@@ -28,6 +28,8 @@ from .stat import stat_result
 
 __all__ = ['stat_result', 'open', 'MultiVolume']
 
+BLOCKSIZE = 16384
+
 
 def open(name: Union[pathlib.Path, str], mode=None, volume=None) -> io.RawIOBase:
     return MultiVolume(name, mode=mode, volume=volume)
@@ -141,7 +143,9 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
                 return i
         return len(self._files) - 1
 
-    def read(self, size: int = 1) -> bytes:
+    def read(self, size: int = -1) -> bytes:
+        if size == -1:
+            return self.readall()
         current = self._current_index()
         file = self._files[current]
         data = file.read(size)
@@ -149,11 +153,16 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         return data
 
     def readall(self) -> bytes:
-        raise NotImplementedError
+        result = b""
+        data = self.read(BLOCKSIZE)
+        while len(data) > 0:
+            result += data
+            data = self.read(BLOCKSIZE)
+        return result
 
     def readinto(self, b: Union[bytearray, memoryview, Container[Any], mmap]) -> int:
-        length = len(b)
-        data = self.read(length)
+        size = len(b)
+        data = self.read(size)
         b[:len(data)] = data
         return len(data)
 
