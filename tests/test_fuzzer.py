@@ -2,7 +2,6 @@ import io
 import os
 import pathlib
 import sys
-import tempfile
 
 from hypothesis import given
 from hypothesis import strategies as st
