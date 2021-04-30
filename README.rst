@@ -19,10 +19,8 @@ See API details at `python library reference`_
 Status
 ======
 
-multivolumefile module is under active development and considered as ***Alpha*** state.
-It is not good idea to use it on production systems, but it may work well in a limited range
-of usage. Please check limitations and passed test cases.
-
+The multivolumefile module is considered as ***Alpha*** stage.
+All binary mode operation are implemented, but text mode is not completed, such as readline() method.
 
 Install
 =======
@@ -63,10 +61,11 @@ you will see file `archive.7z.001` are written.
 Limitations and known issues
 ============================
 
-- fileno() is not supported and when call it, you will get RuntimeError exception.
-- There are several non-implemented functions such as truncate() and writeline() that will raise NotimplementedError
-- There are several non-implemented functions such as readlines(), readline() and readall().
 - Text mode is not implemented.
+    - readlines(), writeline() and readline() raises NotImplementedError.
+- fileno() is not supported and when call it, you will get RuntimeError exception.
+- truncate() will raise NotimplementedError
+
 - ***Caution***: When globbing existent volumes, it glob all files other than 4-digit extensions, it may break your data.
 
 
