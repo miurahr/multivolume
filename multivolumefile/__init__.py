@@ -282,7 +282,24 @@ class MultiVolume(io.RawIOBase, contextlib.AbstractContextManager):
         return self._position
 
     def truncate(self, size: Optional[int] = None) -> int:
-        raise NotImplementedError
+        if size is not None:
+            pos = self.seek(size, io.SEEK_SET)
+            assert pos == size
+        current = self._current_index()
+        idx = current
+        while idx < len(self._files):
+            file = self._files[idx]
+            if idx == current:
+                pos = file.tell()
+                file.truncate(pos)
+            else:
+                file.seek(0, io.SEEK_SET)
+                file.truncate()
+                file.close()
+                os.unlink(file.name)
+            idx += 1
+        self._files = self._files[:current]
+        return self._position
 
     def writable(self) -> bool:
         return self._mode in ["wb", "w", "wt", "x", "xb", "xt", "ab", "a", "at"]
