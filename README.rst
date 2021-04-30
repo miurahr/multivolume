@@ -21,6 +21,14 @@ Status
 
 The multivolumefile module is considered as ***Alpha*** stage.
 All binary mode operation are implemented, but text mode is not completed, such as readline() method.
+Because the library handles your files, it may damage your files.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+There is a good coverage on testing, but it may not be perfect.
+You are welcome to add more test for a reliability.
 
 Install
 =======
