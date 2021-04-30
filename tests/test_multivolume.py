@@ -35,7 +35,7 @@ def test_read_seek():
     pos = mv.tell()
     assert pos == 40000
     b = mv.read(1)
-    assert b == b'\x4d'
+    assert b == b"\x4d"
     mv.seek(-1001, os.SEEK_CUR)
     pos = mv.tell()
     assert pos == 39000
@@ -375,7 +375,6 @@ def test_stat():
         assert st.st_ino == 0
 
 
-
 def test_truncate(tmp_path):
     target = tmp_path.joinpath("target.7z")
     target1 = tmp_path.joinpath("target.7z.0001")
@@ -409,4 +408,3 @@ def test_truncate(tmp_path):
     assert target1.stat().st_size == 10240
     assert target2.stat().st_size == 4760
     assert not target3.exists()
-
