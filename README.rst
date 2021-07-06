@@ -38,6 +38,10 @@ You can install it as usual public libraries, you can use pip command
 ```
 pip install multivolumefile
 ```
+OR, alternatively, through conda:
+```
+conda install -c conda-forge multivolumefile
+```
 
 You are also able to add it to your setup.py/cfg as dependency.
 
