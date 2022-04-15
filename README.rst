@@ -76,8 +76,6 @@ Limitations and known issues
 - Text mode is not implemented.
     - readlines(), writeline() and readline() raises NotImplementedError.
 - fileno() is not supported and when call it, you will get RuntimeError exception.
-- truncate() will raise NotimplementedError
-
 - ***Caution***: When globbing existent volumes, it glob all files other than 4-digit extensions, it may break your data.
 
 

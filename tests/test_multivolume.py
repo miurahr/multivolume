@@ -34,12 +34,19 @@ def test_read_seek():
     mv.seek(40000)
     pos = mv.tell()
     assert pos == 40000
-    mv.seek(-1000, os.SEEK_CUR)
+    b = mv.read(1)
+    assert b == b"\x4d"
+    mv.seek(-1001, os.SEEK_CUR)
     pos = mv.tell()
     assert pos == 39000
     mv.seek(-2337, os.SEEK_END)
     pos = mv.tell()
     assert pos == 50000
+    mv.seek(15000, os.SEEK_SET)
+    pos = mv.tell()
+    assert pos == 15000
+    b = mv.read(1)
+    assert b == b"\x32"
     mv.close()
     assert mv.readable() is False
     mv.flush()
@@ -366,3 +373,38 @@ def test_stat():
         assert st.st_mtime_ns == os.stat(first_target).st_mtime_ns
         assert st.st_dev == os.stat(first_target).st_dev
         assert st.st_ino == 0
+
+
+def test_truncate(tmp_path):
+    target = tmp_path.joinpath("target.7z")
+    target1 = tmp_path.joinpath("target.7z.0001")
+    target2 = tmp_path.joinpath("target.7z.0002")
+    target3 = tmp_path.joinpath("target.7z.0003")
+    # write test data
+    with MV.open(target, mode="wb", volume=10240) as volume:
+        assert volume.writable()
+        with open(os.path.join(testdata_path, "archive.7z.001"), "rb") as r:
+            data = r.read(BLOCKSIZE)
+            while len(data) > 0:
+                volume.write(data)
+                data = r.read(BLOCKSIZE)
+
+        with open(os.path.join(testdata_path, "archive.7z.002"), "rb") as r:
+            data = r.read(BLOCKSIZE)
+            while len(data) > 0:
+                volume.write(data)
+                data = r.read(BLOCKSIZE)
+        assert volume.seekable()
+        volume.seek(0)
+        volume.seek(51000)
+        volume.flush()
+        # check current status
+        assert target1.stat().st_size == 10240
+        assert target2.stat().st_size == 10240
+        assert target3.exists()
+        # run truncate
+        assert volume.truncate(15000) == 15000
+    # assert truncate
+    assert target1.stat().st_size == 10240
+    assert target2.stat().st_size == 4760
+    assert not target3.exists()
