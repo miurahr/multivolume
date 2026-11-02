@@ -41,7 +41,7 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dynamic = ["readme", "version"]
+dynamic = ["version"]
 
 [project.urls]
 Homepage = "https://codeberg.org/miurahr/multivolume"
