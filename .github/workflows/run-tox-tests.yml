@@ -8,37 +8,19 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: [3.8]
+        python-version: [3.10, 3.14]
     name: Test on Python ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v7
       - name: Setup python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
       - name: Install dependencies
         run: |
           pip install -U pip
-          pip install tox tox-gh-actions coveralls
+          pip install tox tox-gh-actions
       - name: Test project with tox
         run: |
           tox
-          coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          COVERALLS_PARALLEL: true
-          COVERALLS_FLAG_NAME: py-${{ matrix.python-version }}-${{ matrix.os }}
-          PYTEST_ADDOPTS: --cov-config=pyproject.toml --cov --cov-append
-  finish:
-    runs-on: ubuntu-latest
-    name: finish parallel build
-    needs: build
-    steps:
-      - name: Tell Coveralls that the parallel build is finished
-        run: |
-          curl -k \
-              https://coveralls.io/webhook?repo_token=$COVERALLS_REPO_TOKEN \
-              -d "payload[build_num]=$GITHUB_SHA&payload[status]=done"
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}

@@ -12,6 +12,7 @@ Added
 
 Changed
 -------
+* Supported python version 3.10...3.15
 
 Fixed
 -----
